@@ -35,6 +35,19 @@ extern "C" {
         int tabla_estado; // Ocupado = 1 ** Libre = 0
     } XTABLA;
     
+    typedef struct arreglo{
+        XTABLA reg_1;
+        XTABLA reg_2;
+        XTABLA reg_3;
+        XTABLA reg_4;
+        XTABLA reg_5;
+        XTABLA reg_6;
+        XTABLA reg_7;
+        XTABLA reg_8;
+        XTABLA reg_9;
+        XTABLA reg_10;
+    } XARREGLO;
+    
     typedef struct bloque {
         char bd_data[50];
         int bd_numero;

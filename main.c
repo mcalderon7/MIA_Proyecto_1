@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "op_disco.h"
+#include "op_archivos.h"
 
 #define KBLU  "\x1B[34m"
 #define RED  "\x1B[31m"
@@ -33,6 +34,18 @@ int main() {
         }else if(entrada == 1){
             printf("***************************************************************\n");
             crear_disco();
+        }else if(entrada == 2){
+            printf("***************************************************************\n");
+            //crear_disco();
+        }else if(entrada == 3){
+            printf("***************************************************************\n");
+            //crear_disco();
+        }else if(entrada == 4){
+            printf("***************************************************************\n");
+            crear_directorio();
+        }else if(entrada == 5){
+            printf("***************************************************************\n");
+            //crear_disco();
         }else{
             printf(RED "***************************************************************\n" END);
             printf(RED "OPCION INGRESADA INVALIDA.\n" END);

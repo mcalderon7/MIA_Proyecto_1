@@ -14,7 +14,8 @@
 
 void crear_disco(){
     
-    char path[] = "C:/Users/DEV01/Desktop/mia_proyecto_1/";
+    //char path[] = "C:/Users/DEV01/Desktop/mia_proyecto_1/";
+    char path[] = "/home/marvin/mia_proyecto_1/";
     
     int cantidad = 0;
     
@@ -54,7 +55,7 @@ void crear_disco(){
             int i;
             int j;
             int posicion = sizeof(XMBR);
-            for( i = 0; i < cantidad; i++){
+            for( i = 1; i < cantidad + 1; i++){
                 
                 // Inicio de creación del archivo de DataNode 
                     XNODO nodo;
@@ -115,7 +116,7 @@ void crear_disco(){
                     
                     XNODO nodo;
                     limpiar(nodo.nodo_ruta_nodo, sizeof(nodo.nodo_ruta_nodo));
-                    strcat(nodo.nodo_ruta_nodo, "NONE");
+                    strcat(nodo.nodo_ruta_nodo, "ESPACIOVACIO");
                     nodo.nodo_tamano_nodo = -1;
                     nodo.nodo_tamano_nodo_m = -1;
                     
@@ -134,7 +135,7 @@ void crear_disco(){
                     
                     XTABLA tabla;
                     limpiar(tabla.tabla_nombre, sizeof(tabla.tabla_nombre));
-                    strcat(tabla.tabla_nombre, "NONE");
+                    strcat(tabla.tabla_nombre, "TABLAVACIA");
                     tabla.tabla_tipo = -1;
                     tabla.tabla_fecha_creacion = time(0);
                     tabla.tabla_bloque_inicial = -1;
@@ -142,10 +143,35 @@ void crear_disco(){
                     tabla.tabla_padre = -1;
                     tabla.tabla_estado = 0;
                     
-                    fseek(fp, posicion, SEEK_SET);
-                    fwrite(&tabla, sizeof(XTABLA), 1, fp);
+                    XARREGLO arreglo;
+                    arreglo.reg_1 = tabla;
+                    arreglo.reg_2 = tabla;
+                    arreglo.reg_3 = tabla;
+                    arreglo.reg_4 = tabla;
+                    arreglo.reg_5 = tabla;
+                    arreglo.reg_6 = tabla;
+                    arreglo.reg_7 = tabla;
+                    arreglo.reg_8 = tabla;
+                    arreglo.reg_9 = tabla;
+                    arreglo.reg_10 = tabla;
                     
-                    posicion += sizeof(XTABLA);
+                    if(i == 0){
+                        
+                        limpiar(arreglo.reg_1.tabla_nombre, sizeof(arreglo.reg_1.tabla_nombre));
+                        strcat(arreglo.reg_1.tabla_nombre, "/");
+                        arreglo.reg_1.tabla_tipo = 1;
+                        arreglo.reg_1.tabla_fecha_creacion = time(0);
+                        arreglo.reg_1.tabla_bloque_inicial = posicion + sizeof(XARREGLO);
+                        arreglo.reg_1.tabla_datanode = -1;
+                        arreglo.reg_1.tabla_padre = posicion;
+                        arreglo.reg_1.tabla_estado = 1;
+                        
+                    }
+                    
+                    fseek(fp, posicion, SEEK_SET);
+                    fwrite(&arreglo, sizeof(XARREGLO), 1, fp);
+                    
+                    posicion += sizeof(XARREGLO);
                     
                 }
             
