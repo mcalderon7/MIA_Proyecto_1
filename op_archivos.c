@@ -16,7 +16,8 @@
 
 void crear_directorio(){
     
-    char path[] = "/home/marvin/mia_proyecto_1/";
+    char path[] = "C:/Users/DEV01/Desktop/mia_proyecto_1/";
+    //char path[] = "/home/marvin/mia_proyecto_1/";
     
     char directorio[100];
     limpiar(directorio, 100);
@@ -43,22 +44,28 @@ void crear_directorio(){
         // bandera que me sirve para identificar la existencia o creacion de una carpeta
         int flag = 0;
         
+        int pos_subcarpetas = 0;
         XARREGLO testArreglo;
         
         FILE * fp = fopen(fullpath, "r+b");
         fseek(fp, posicion_tablas, SEEK_SET);
         fread(&testArreglo, sizeof(XARREGLO), 1, fp);
         
-        // posicion_tablas en este punto es el apuntador al bloque de tablas (subcarpetas) de raiz (/)
-        posicion_tablas = testArreglo.reg_1.tabla_bloque_inicial;
+        if(testArreglo.reg_1.tabla_bloque_inicial == -1){
+            pos_subcarpetas = verificar_posicion_subcarpeta_disponible(fullpath, posicion_tablas);
+        }else{
+            pos_subcarpetas = testArreglo.reg_1.tabla_bloque_inicial;
+        }
         
         char * pch = strtok (directorio, "/");
         while (pch != NULL)
         {
             
-            int resp = verificar_existencia_carpeta(fullpath, posicion_tablas, pch);
+            int resp = verificar_existencia_carpeta(fullpath, pos_subcarpetas, pch);
             
-            if(resp != -1){
+            printf("/// EXISTE LA CARPETA: %d ///\n", resp);
+            
+            /*if(resp != -1){
                 padre = posicion_tablas;
                 posicion_tablas = resp;
                 flag = 1;
@@ -92,7 +99,9 @@ void crear_directorio(){
                 
                 //printf ("%s\n",pch);
                 pch = strtok (NULL, "/");
-            }
+            }*/
+            
+            pch = strtok (NULL, "/");
             
         }
         
@@ -133,10 +142,15 @@ int crear_carpeta(char * path, int posicion_tabla, char * nombre_carpeta, int pa
             
             testTabla.tabla_tipo = 1;
             testTabla.tabla_fecha_creacion = time(0);
-            testTabla.tabla_bloque_inicial = get_posicion_subcarpetas(path);
+            testTabla.tabla_bloque_inicial = -1;
             testTabla.tabla_datanode = -1;
             testTabla.tabla_padre = padre;
             testTabla.tabla_estado = 1;
+            
+            fseek(fp, posicion, SEEK_SET);
+            fwrite(&testTabla, sizeof(XTABLA), 1, fp);
+            
+            testTabla.tabla_bloque_inicial = get_posicion_subcarpetas(path);
             
             fseek(fp, posicion, SEEK_SET);
             fwrite(&testTabla, sizeof(XTABLA), 1, fp);
@@ -167,10 +181,8 @@ int get_posicion_subcarpetas(char * path){
     
     XARREGLO testArreglo;
     FILE * fp = fopen(path, "r+b");
-    fseek(fp, posicion_inicial, SEEK_SET);
-    fread(&testArreglo, sizeof(XARREGLO), 1, fp);
     
-    int auxiliar = testArreglo.reg_1.tabla_bloque_inicial;
+    int auxiliar = posicion_inicial;
     int respuesta = 0;
     
     while(auxiliar != -1){
@@ -178,16 +190,20 @@ int get_posicion_subcarpetas(char * path){
         fseek(fp, auxiliar, SEEK_SET);
         fread(&testArreglo, sizeof(XARREGLO), 1, fp);
         
-        if(testArreglo.reg_1.tabla_bloque_inicial != -1){
-            auxiliar = testArreglo.reg_1.tabla_bloque_inicial;
+        if(testArreglo.reg_1.tabla_estado == 1){
+            printf("/// AUXILIAR AL INICIO: %d ///\n", auxiliar);
+            auxiliar += sizeof(XARREGLO);
+            printf("/// AUXILIAR AL FINAL: %d ///\n", auxiliar);
         }else{
-            respuesta = auxiliar + sizeof(XARREGLO);
+            respuesta = auxiliar;
             auxiliar = -1;
         }
         
     }
     
     fclose(fp);
+    
+    printf("// POSICION A SUBCARPETA: %d //\n", respuesta);
     
     return respuesta;
     

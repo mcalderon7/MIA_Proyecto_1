@@ -43,3 +43,29 @@ int verificar_existencia_carpeta(char * path, int posicion_tabla, char * nombre_
     return respuesta;
     
 }
+
+int verificar_posicion_subcarpeta_disponible(char * path){
+    
+    int posicion = sizeof(XMBR) + (10*sizeof(XNODO));
+    
+    XARREGLO arreglo;
+    FILE * fp = fopen(path, "r+b");
+    
+    while(posicion != -1){
+        
+        fseek(fp, posicion, SEEK_SET);
+        fread(&arreglo, sizeof(XARREGLO), 1, fp);
+        
+        if(arreglo.reg_1.tabla_bloque_inicial != -1){
+            posicion = arreglo.reg_1.tabla_bloque_inicial;
+        }else{
+            break; 
+        }
+        
+    }
+    
+    posicion += sizeof(XARREGLO);
+    
+    return posicion;
+    
+}

@@ -19,6 +19,7 @@ extern "C" {
 #endif
 
     int verificar_existencia_carpeta(char * path, int posicion_tabla, char * nombre_carpeta);
+    int verificar_posicion_subcarpeta_disponible(char * path, int posicion);
 
 #ifdef __cplusplus
 }
