@@ -161,10 +161,13 @@ void crear_disco(){
                         strcat(arreglo.reg_1.tabla_nombre, "/");
                         arreglo.reg_1.tabla_tipo = 1;
                         arreglo.reg_1.tabla_fecha_creacion = time(0);
-                        arreglo.reg_1.tabla_bloque_inicial = -1;
+                        arreglo.reg_1.tabla_bloque_inicial = posicion + sizeof(XARREGLO);
                         arreglo.reg_1.tabla_datanode = -1;
                         arreglo.reg_1.tabla_padre = posicion;
                         arreglo.reg_1.tabla_estado = 1;
+                        
+                        printf("/// RAIZ COMIENZA EN: %d ///\n", posicion);
+                        printf("/// SUBCARPETA DE RAIZ COMIENZA EN: %d ///\n", arreglo.reg_1.tabla_bloque_inicial);
                         
                     }
                     

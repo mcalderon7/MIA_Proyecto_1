@@ -38,71 +38,49 @@ void crear_directorio(){
         strcat(fullpath, dname);
         
         // posicion_tablas en este punto es el apuntador al bloque de tablas que contiene a la raiz (/)
-        int posicion_tablas = sizeof(XMBR) + (sizeof(XNODO)*10);
+        int posicion_raiz = sizeof(XMBR) + (sizeof(XNODO)*10);
         // padre en este punto es tambien un apuntador que hace referencia a la misma raiz ya que ella es su mismo padre
-        int padre = posicion_tablas;
-        // bandera que me sirve para identificar la existencia o creacion de una carpeta
+        int padre = posicion_raiz;
+        // bandera que me sirve para diferenciar entre existencia de carpeta y creacion de una nueva
         int flag = 0;
-        
+        // posicion de las subcarpetas que se esta leyendo en ese momento
         int pos_subcarpetas = 0;
+        
         XARREGLO testArreglo;
         
         FILE * fp = fopen(fullpath, "r+b");
-        fseek(fp, posicion_tablas, SEEK_SET);
+        fseek(fp, posicion_raiz, SEEK_SET);
         fread(&testArreglo, sizeof(XARREGLO), 1, fp);
-        
-        if(testArreglo.reg_1.tabla_bloque_inicial == -1){
-            pos_subcarpetas = verificar_posicion_subcarpeta_disponible(fullpath, posicion_tablas);
-        }else{
-            pos_subcarpetas = testArreglo.reg_1.tabla_bloque_inicial;
-        }
+        pos_subcarpetas = testArreglo.reg_1.tabla_bloque_inicial;
         
         char * pch = strtok (directorio, "/");
         while (pch != NULL)
         {
-            
+            // Verifico si la carpeta que desea crear ya existe en la lista de tablas del apuntador de subcarpetas del elemento en cuestión
             int resp = verificar_existencia_carpeta(fullpath, pos_subcarpetas, pch);
             
-            printf("/// EXISTE LA CARPETA: %d ///\n", resp);
-            
-            /*if(resp != -1){
-                padre = posicion_tablas;
-                posicion_tablas = resp;
+            if(resp != -1){
+                padre = pos_subcarpetas;
+                pos_subcarpetas = resp;
                 flag = 1;
             }else{
-                int resp_cc = crear_carpeta(fullpath, posicion_tablas, pch, padre);
-                padre = posicion_tablas;
-                posicion_tablas = resp_cc;
+                int new_subcarpeta = crear_carpeta(fullpath, pos_subcarpetas, pch, padre);
+                padre = pos_subcarpetas;
+                pos_subcarpetas = new_subcarpeta;
                 flag = 0;
             }
             
-            if(posicion_tablas == -1){
-                
-                printf(RED "------------------------------------------------------------------------\n" END);
-                printf(RED "No se pudo crear la carpeta: %s\n", pch);
-                printf(RED "------------------------------------------------------------------------\n" END);
-                
-                break;
-                
+            if(flag == 0){
+                printf(GRN "------------------------------------------------------------------------\n" END);
+                printf(GRN "Carpeta %s creada exitosamente!\n", pch);
+                printf(GRN "------------------------------------------------------------------------\n" END);
             }else{
-                
-                if(flag == 0){
-                    printf(GRN "------------------------------------------------------------------------\n" END);
-                    printf(GRN "Carpeta %s creada exitosamente!\n", pch);
-                    printf(GRN "------------------------------------------------------------------------\n" END);
-                }else{
-                    printf(GRN "------------------------------------------------------------------------\n" END);
-                    printf(GRN "No se crea la carpeta %s porque ya existe!\n", pch);
-                    printf(GRN "------------------------------------------------------------------------\n" END);
-                }
-                
-                
-                //printf ("%s\n",pch);
-                pch = strtok (NULL, "/");
-            }*/
+                printf(GRN "------------------------------------------------------------------------\n" END);
+                printf(GRN "No se crea la carpeta %s porque ya existe!\n", pch);
+                printf(GRN "------------------------------------------------------------------------\n" END);
+            }
             
             pch = strtok (NULL, "/");
-            
         }
         
         fclose(fp);
@@ -142,15 +120,10 @@ int crear_carpeta(char * path, int posicion_tabla, char * nombre_carpeta, int pa
             
             testTabla.tabla_tipo = 1;
             testTabla.tabla_fecha_creacion = time(0);
-            testTabla.tabla_bloque_inicial = -1;
+            testTabla.tabla_bloque_inicial = verificar_posicion_subcarpeta_disponible(path);
             testTabla.tabla_datanode = -1;
             testTabla.tabla_padre = padre;
             testTabla.tabla_estado = 1;
-            
-            fseek(fp, posicion, SEEK_SET);
-            fwrite(&testTabla, sizeof(XTABLA), 1, fp);
-            
-            testTabla.tabla_bloque_inicial = get_posicion_subcarpetas(path);
             
             fseek(fp, posicion, SEEK_SET);
             fwrite(&testTabla, sizeof(XTABLA), 1, fp);
@@ -168,42 +141,6 @@ int crear_carpeta(char * path, int posicion_tabla, char * nombre_carpeta, int pa
     fclose(fp);
     
     printf(" %%%%%%%%%%%%%%%%%%%%%%%%%%%% FINALIZA CREACION DE CARPETA %%%%%%%%%%%%%%%%%%%%%%%%%%%%\n");
-    
-    return respuesta;
-    
-}
-
-// La funcion get_posicion_subcarpetas se encarga de obtener la posicion en donde se encuentra el proximo
-// arreglo de tablas vacio.
-int get_posicion_subcarpetas(char * path){
-    
-    int posicion_inicial = sizeof(XMBR) + (sizeof(XNODO)*10);
-    
-    XARREGLO testArreglo;
-    FILE * fp = fopen(path, "r+b");
-    
-    int auxiliar = posicion_inicial;
-    int respuesta = 0;
-    
-    while(auxiliar != -1){
-        
-        fseek(fp, auxiliar, SEEK_SET);
-        fread(&testArreglo, sizeof(XARREGLO), 1, fp);
-        
-        if(testArreglo.reg_1.tabla_estado == 1){
-            printf("/// AUXILIAR AL INICIO: %d ///\n", auxiliar);
-            auxiliar += sizeof(XARREGLO);
-            printf("/// AUXILIAR AL FINAL: %d ///\n", auxiliar);
-        }else{
-            respuesta = auxiliar;
-            auxiliar = -1;
-        }
-        
-    }
-    
-    fclose(fp);
-    
-    printf("// POSICION A SUBCARPETA: %d //\n", respuesta);
     
     return respuesta;
     

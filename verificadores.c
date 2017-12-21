@@ -64,6 +64,8 @@ int verificar_posicion_subcarpeta_disponible(char * path){
         
     }
     
+    fclose(fp);
+    
     posicion += sizeof(XARREGLO);
     
     return posicion;
